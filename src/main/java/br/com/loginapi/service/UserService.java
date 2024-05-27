@@ -19,22 +19,22 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public List<UserResponseDTO> listarUsuario() {
+    public List<UserResponseDTO> listUsers() {
         List<User> users = userRepository.findAll();
         List<UserResponseDTO> userResponseDTOS = new ArrayList<>();
 
         for (User user : users) {
-            userResponseDTOS.add(UserConverter.converterEntidadeParaDTO(user));
+            userResponseDTOS.add(UserConverter.convertEntityToDTO(user));
         }
 
         return userResponseDTOS;
     }
 
-    public void cadastrarUsuario(UserRequestDTO userRequestDTO) {
+    public void registerUsers(UserRequestDTO userRequestDTO) {
         String name = userRequestDTO.getName();
         String email = userRequestDTO.getEmail();
 
-        User user = UserConverter.converterDTOParaEntidade(userRequestDTO);
+        User user = UserConverter.convertDTOToEntity(userRequestDTO);
 
         userRepository.save(user);
     }

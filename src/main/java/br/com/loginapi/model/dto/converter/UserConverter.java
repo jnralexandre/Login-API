@@ -6,7 +6,7 @@ import br.com.loginapi.model.dto.UserResponseDTO;
 
 public class UserConverter {
 
-    public static User converterDTOParaEntidade(UserRequestDTO userRequestDTO) {
+    public static User convertDTOToEntity(UserRequestDTO userRequestDTO) {
         User userEntity = new User();
 
         userEntity.setName(userRequestDTO.getName());
@@ -16,7 +16,7 @@ public class UserConverter {
         return userEntity;
     }
 
-    public static UserResponseDTO converterEntidadeParaDTO(User user) {
+    public static UserResponseDTO convertEntityToDTO(User user) {
         UserResponseDTO userResponseDTO = new UserResponseDTO();
 
         userResponseDTO.setId(user.getId());
