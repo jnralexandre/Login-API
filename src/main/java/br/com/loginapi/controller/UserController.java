@@ -32,4 +32,10 @@ public class UserController {
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
+    @DeleteMapping("/delete-users")
+    public ResponseEntity<UserResponseDTO> deleteUsers(@RequestBody UserRequestDTO userRequestDTO) {
+
+        return ResponseEntity.ok(this.userService.deleteUsers(userRequestDTO));
+    }
+
 }
