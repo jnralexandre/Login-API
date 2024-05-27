@@ -31,3 +31,6 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Class ###
+src/main/java/br/com/loginapi/repository/MongoConfig.java
