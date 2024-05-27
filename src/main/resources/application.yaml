@@ -1,0 +1,15 @@
+server:
+  servlet:
+    context-path: /login-api
+  port: 8081
+  error:
+    include-message: always
+
+spring:
+  application:
+    name: Login-API
+  data:
+    mongodb:
+      host: localhost
+      port: 27017
+      database: user
