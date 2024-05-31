@@ -25,6 +25,9 @@ public class UserService {
     private static final String MESSAGE_TO_INVALID_EMAIL = "O e-mail fornecido não é válido.";
     private static final String MESSAGE_TO_EMAIL_INCORRECT = "O e-mail informado está incorreto.";
     private static final String MESSAGE_FOR_INCORRECT_PASSWORD = "A senha informada está incorreta.";
+    private static final String MESSAGE_TO_EMAIL_AND_PASSWORD_INCORRECT = "Informe o e-mail e a senha para continuar.";
+    private static final String MESSAGE_FOR_INVALID_NAME = "O nome atual deve ser diferente do antigo.";
+
 
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
@@ -77,6 +80,10 @@ public class UserService {
     }
 
     public UserResponseDTO deleteUsers(UserRequestDTO userRequestDTO) {
+        if (StringUtils.isBlank(userRequestDTO.getEmail()) || StringUtils.isBlank(userRequestDTO.getPassword())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, MESSAGE_TO_EMAIL_AND_PASSWORD_INCORRECT);
+        }
+
         String email = userRequestDTO.getEmail();
         String password = userRequestDTO.getPassword();
 
@@ -93,6 +100,35 @@ public class UserService {
         userRepository.delete(userToDelete);
 
         return UserConverter.convertEntityToDTO(userToDelete);
+    }
+
+    public boolean changeName(UserRequestDTO userRequestDTO) {
+        if (StringUtils.isBlank(userRequestDTO.getEmail()) || StringUtils.isBlank(userRequestDTO.getPassword())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, MESSAGE_TO_EMAIL_AND_PASSWORD_INCORRECT);
+        }
+
+        User existingUser = userRepository.findByEmail(userRequestDTO.getEmail());
+
+        if (existingUser == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, MESSAGE_TO_EMAIL_INCORRECT);
+        }
+
+        if (!bCryptPasswordEncoder.matches(userRequestDTO.getPassword(), existingUser.getPassword())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, MESSAGE_FOR_INCORRECT_PASSWORD);
+        }
+
+        if (StringUtils.isBlank(userRequestDTO.getName())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, MESSAGE_TO_EMPTY_NAME);
+        }
+
+        if (existingUser.getName().equals(userRequestDTO.getName())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, MESSAGE_FOR_INVALID_NAME);
+        }
+
+        existingUser.setName(userRequestDTO.getName());
+        userRepository.save(existingUser);
+
+        return true;
     }
 
 }

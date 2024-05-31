@@ -3,6 +3,7 @@ package br.com.loginapi.controller;
 import br.com.loginapi.model.dto.UserRequestDTO;
 import br.com.loginapi.model.dto.UserResponseDTO;
 import br.com.loginapi.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,8 +14,9 @@ import java.util.List;
 @RequestMapping("api/v1/users")
 public class UserController {
 
-    private UserService userService;
+    private final UserService userService;
 
+    @Autowired
     public UserController(UserService userService) {
         this.userService = userService;
     }
@@ -36,6 +38,17 @@ public class UserController {
     public ResponseEntity<UserResponseDTO> deleteUsers(@RequestBody UserRequestDTO userRequestDTO) {
 
         return ResponseEntity.ok(this.userService.deleteUsers(userRequestDTO));
+    }
+
+    @PatchMapping("/change-name")
+    public ResponseEntity<Void> changeName(@RequestBody UserRequestDTO userRequestDTO) {
+        boolean sucess = userService.changeName(userRequestDTO);
+
+        if (sucess) {
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
     }
 
 }
