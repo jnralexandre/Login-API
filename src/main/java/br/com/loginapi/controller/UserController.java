@@ -1,6 +1,7 @@
 package br.com.loginapi.controller;
 
 import br.com.loginapi.model.dto.EmailUpdateRequestDTO;
+import br.com.loginapi.model.dto.PasswordUpdateRequestDTO;
 import br.com.loginapi.model.dto.UserRequestDTO;
 import br.com.loginapi.model.dto.UserResponseDTO;
 import br.com.loginapi.service.UserService;
@@ -55,6 +56,17 @@ public class UserController {
     @PatchMapping("/update-email")
     public ResponseEntity<Void> updateEmail(@RequestBody EmailUpdateRequestDTO emailUpdateRequestDTO) {
         boolean sucess = userService.updateEmail(emailUpdateRequestDTO);
+
+        if (sucess) {
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+    }
+
+    @PatchMapping("/update-password")
+    public ResponseEntity<Void> updatePassword(@RequestBody PasswordUpdateRequestDTO passwordUpdateRequestDTO) {
+        boolean sucess = userService.updatePassword(passwordUpdateRequestDTO);
 
         if (sucess) {
             return ResponseEntity.noContent().build();

@@ -2,6 +2,7 @@ package br.com.loginapi.service;
 
 import br.com.loginapi.model.User;
 import br.com.loginapi.model.dto.EmailUpdateRequestDTO;
+import br.com.loginapi.model.dto.PasswordUpdateRequestDTO;
 import br.com.loginapi.model.dto.UserRequestDTO;
 import br.com.loginapi.model.dto.UserResponseDTO;
 import br.com.loginapi.model.dto.converter.UserConverter;
@@ -29,7 +30,7 @@ public class UserService {
     private static final String MESSAGE_FOR_INVALID_NAME = "O novo nome deve ser diferente do atual.";
     private static final String MESSAGE_ALL_FIELDS_REQUIRED = "Preencha todos os campos.";
     private static final String MESSAGE_FOR_INVALID_EMAIL = "O novo e-mail deve ser diferente do atual.";
-
+    private static final String MESSAGE_FOR_INVALID_PASSWORD = "A nova senha deve ser diferente da atual.";
 
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
@@ -164,5 +165,32 @@ public class UserService {
         return true;
     }
 
+
+    public boolean updatePassword(PasswordUpdateRequestDTO passwordUpdateRequestDTO) {
+        if (StringUtils.isBlank(passwordUpdateRequestDTO.getEmail())
+                || StringUtils.isBlank(passwordUpdateRequestDTO.getCurrentPassword())
+                || StringUtils.isBlank(passwordUpdateRequestDTO.getNewPassword())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, MESSAGE_ALL_FIELDS_REQUIRED);
+        }
+
+        User existingUser = userRepository.findByEmail(passwordUpdateRequestDTO.getEmail());
+
+        if (existingUser == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, MESSAGE_TO_EMAIL_INCORRECT);
+        }
+
+        if (!bCryptPasswordEncoder.matches(passwordUpdateRequestDTO.getCurrentPassword(), existingUser.getPassword())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, MESSAGE_FOR_INCORRECT_PASSWORD);
+        }
+
+        if (passwordUpdateRequestDTO.getCurrentPassword().equals(passwordUpdateRequestDTO.getNewPassword())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, MESSAGE_FOR_INVALID_PASSWORD);
+        }
+
+        existingUser.setPassword(bCryptPasswordEncoder.encode(passwordUpdateRequestDTO.getNewPassword()));
+        userRepository.save(existingUser);
+
+        return true;
+    }
 
 }
