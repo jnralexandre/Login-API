@@ -1,6 +1,7 @@
 package br.com.loginapi.service;
 
 import br.com.loginapi.model.User;
+import br.com.loginapi.model.dto.EmailUpdateRequestDTO;
 import br.com.loginapi.model.dto.UserRequestDTO;
 import br.com.loginapi.model.dto.UserResponseDTO;
 import br.com.loginapi.model.dto.converter.UserConverter;
@@ -25,8 +26,9 @@ public class UserService {
     private static final String MESSAGE_TO_INVALID_EMAIL = "O e-mail fornecido não é válido.";
     private static final String MESSAGE_TO_EMAIL_INCORRECT = "O e-mail informado está incorreto.";
     private static final String MESSAGE_FOR_INCORRECT_PASSWORD = "A senha informada está incorreta.";
-    private static final String MESSAGE_TO_EMAIL_AND_PASSWORD_INCORRECT = "Informe o e-mail e a senha para continuar.";
-    private static final String MESSAGE_FOR_INVALID_NAME = "O nome atual deve ser diferente do antigo.";
+    private static final String MESSAGE_FOR_INVALID_NAME = "O novo nome deve ser diferente do atual.";
+    private static final String MESSAGE_ALL_FIELDS_REQUIRED = "Preencha todos os campos.";
+    private static final String MESSAGE_FOR_INVALID_EMAIL = "O novo e-mail deve ser diferente do atual.";
 
 
     private final UserRepository userRepository;
@@ -81,7 +83,7 @@ public class UserService {
 
     public UserResponseDTO deleteUsers(UserRequestDTO userRequestDTO) {
         if (StringUtils.isBlank(userRequestDTO.getEmail()) || StringUtils.isBlank(userRequestDTO.getPassword())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, MESSAGE_TO_EMAIL_AND_PASSWORD_INCORRECT);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, MESSAGE_ALL_FIELDS_REQUIRED);
         }
 
         String email = userRequestDTO.getEmail();
@@ -102,9 +104,9 @@ public class UserService {
         return UserConverter.convertEntityToDTO(userToDelete);
     }
 
-    public boolean changeName(UserRequestDTO userRequestDTO) {
+    public boolean updateName(UserRequestDTO userRequestDTO) {
         if (StringUtils.isBlank(userRequestDTO.getEmail()) || StringUtils.isBlank(userRequestDTO.getPassword())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, MESSAGE_TO_EMAIL_AND_PASSWORD_INCORRECT);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, MESSAGE_ALL_FIELDS_REQUIRED);
         }
 
         User existingUser = userRepository.findByEmail(userRequestDTO.getEmail());
@@ -130,5 +132,37 @@ public class UserService {
 
         return true;
     }
+
+    public boolean updateEmail(EmailUpdateRequestDTO emailUpdateRequestDTO) {
+        if (StringUtils.isBlank(emailUpdateRequestDTO.getCurrentEmail())
+                || StringUtils.isBlank(emailUpdateRequestDTO.getPassword())
+                || StringUtils.isBlank(emailUpdateRequestDTO.getNewEmail())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, MESSAGE_ALL_FIELDS_REQUIRED);
+        }
+
+        if (!isValidEmail(emailUpdateRequestDTO.getNewEmail())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, MESSAGE_TO_INVALID_EMAIL);
+        }
+
+        User existingUser = userRepository.findByEmail(emailUpdateRequestDTO.getCurrentEmail());
+
+        if (existingUser == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, MESSAGE_TO_EMAIL_INCORRECT);
+        }
+
+        if (!bCryptPasswordEncoder.matches(emailUpdateRequestDTO.getPassword(), existingUser.getPassword())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, MESSAGE_FOR_INCORRECT_PASSWORD);
+        }
+
+        if (existingUser.getEmail().equals(emailUpdateRequestDTO.getNewEmail())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, MESSAGE_FOR_INVALID_EMAIL);
+        }
+
+        existingUser.setEmail(emailUpdateRequestDTO.getNewEmail());
+        userRepository.save(existingUser);
+
+        return true;
+    }
+
 
 }

@@ -1,5 +1,6 @@
 package br.com.loginapi.controller;
 
+import br.com.loginapi.model.dto.EmailUpdateRequestDTO;
 import br.com.loginapi.model.dto.UserRequestDTO;
 import br.com.loginapi.model.dto.UserResponseDTO;
 import br.com.loginapi.service.UserService;
@@ -40,9 +41,20 @@ public class UserController {
         return ResponseEntity.ok(this.userService.deleteUsers(userRequestDTO));
     }
 
-    @PatchMapping("/change-name")
-    public ResponseEntity<Void> changeName(@RequestBody UserRequestDTO userRequestDTO) {
-        boolean sucess = userService.changeName(userRequestDTO);
+    @PatchMapping("/update-name")
+    public ResponseEntity<Void> updateName(@RequestBody UserRequestDTO userRequestDTO) {
+        boolean sucess = userService.updateName(userRequestDTO);
+
+        if (sucess) {
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+    }
+
+    @PatchMapping("/update-email")
+    public ResponseEntity<Void> updateEmail(@RequestBody EmailUpdateRequestDTO emailUpdateRequestDTO) {
+        boolean sucess = userService.updateEmail(emailUpdateRequestDTO);
 
         if (sucess) {
             return ResponseEntity.noContent().build();
